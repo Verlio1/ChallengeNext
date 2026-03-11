@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuardianBrick — Pitch</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #3b82f6;
+    --blue-dark: #1d4ed8;
+    --violet: #7c3aed;
+    --violet-light: #ede9fe;
+    --red: #ef4444;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --gray-900: #0f172a;
+    --gray-800: #1e293b;
+    --gray-700: #334155;
+    --gray-500: #64748b;
+    --gray-300: #cbd5e1;
+    --gray-100: #f1f5f9;
+    --white: #ffffff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--gray-900);
+    color: var(--white);
+    overflow: hidden;
+  }
+
+  .deck { width: 100%; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 60px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    transform: translateY(30px);
+  }
+  .slide.active {
+    opacity: 1; pointer-events: all;
+    transform: translateY(0);
+  }
+
+  /* nav */
+  .nav {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 16px; z-index: 100;
+    background: rgba(255,255,255,0.08); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px; padding: 10px 20px;
+  }
+  .nav button {
+    background: none; border: none; color: var(--white);
+    font-size: 18px; cursor: pointer; padding: 4px 8px;
+    opacity: 0.6; transition: opacity 0.2s;
+  }
+  .nav button:hover { opacity: 1; }
+  .dots { display: flex; gap: 8px; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.3); cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .dot.active { background: var(--blue); transform: scale(1.3); }
+
+  /* slide counter */
+  .counter {
+    position: fixed; top: 24px; right: 32px;
+    font-size: 13px; color: rgba(255,255,255,0.3);
+    z-index: 100;
+  }
+
+  /* ── SLIDE 1: Hero ── */
+  .s1 { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); }
+  .s1 .glow {
+    position: absolute; width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .logo-mark {
+    width: 72px; height: 72px; border-radius: 20px;
+    background: linear-gradient(135deg, var(--blue), var(--violet));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; margin-bottom: 24px;
+    box-shadow: 0 20px 60px rgba(99,102,241,0.4);
+  }
+  .s1 h1 {
+    font-size: clamp(48px, 6vw, 80px);
+    font-weight: 800; letter-spacing: -2px;
+    background: linear-gradient(135deg, #fff 30%, #a5b4fc);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-align: center; line-height: 1.1; margin-bottom: 16px;
+  }
+  .s1 .tagline {
+    font-size: clamp(16px, 2vw, 22px);
+    color: rgba(255,255,255,0.5); text-align: center;
+    max-width: 560px; line-height: 1.6;
+  }
+  .badge-row { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; justify-content: center; }
+  .badge {
+    font-size: 12px; font-weight: 600; padding: 6px 14px;
+    border-radius: 999px; border: 1px solid;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .badge-blue { border-color: rgba(99,102,241,0.5); color: #a5b4fc; background: rgba(99,102,241,0.1); }
+  .badge-green { border-color: rgba(34,197,94,0.5); color: #86efac; background: rgba(34,197,94,0.1); }
+  .badge-amber { border-color: rgba(245,158,11,0.5); color: #fcd34d; background: rgba(245,158,11,0.1); }
+
+  /* ── SLIDE 2: Problem ── */
+  .s2 { background: #0f172a; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; width: 100%; max-width: 900px; margin-top: 40px; }
+  .stat-card {
+    background: var(--gray-800); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 32px; text-align: center;
+  }
+  .stat-num { font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+  .stat-label { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 8px; line-height: 1.5; }
+  .stat-red { color: var(--red); }
+  .stat-amber { color: var(--amber); }
+  .stat-blue { color: var(--blue); }
+
+  /* ── SLIDE 3: Solution ── */
+  .s3 { background: linear-gradient(135deg, #0f172a, #0c1a35); }
+  .flow {
+    display: flex; align-items: center; gap: 0; margin-top: 40px;
+    width: 100%; max-width: 900px;
+  }
+  .flow-step {
+    flex: 1; text-align: center; padding: 28px 20px;
+    background: var(--gray-800); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+  }
+  .flow-step .icon { font-size: 36px; margin-bottom: 12px; }
+  .flow-step h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .flow-step p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+  .flow-arrow {
+    font-size: 24px; color: var(--blue); padding: 0 8px; flex-shrink: 0;
+  }
+
+  /* ── SLIDE 4: How it works ── */
+  .s4 { background: #0f172a; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 100%; max-width: 900px; margin-top: 36px; }
+  .panel {
+    background: var(--gray-800); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 28px;
+  }
+  .panel h3 { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .brick-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .brick-item:last-child { border-bottom: none; }
+  .brick-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .brick-dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .brick-dot.amber { background: var(--amber); }
+  .brick-dot.red { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .brick-name { font-size: 14px; font-weight: 600; flex: 1; }
+  .brick-bar-wrap { width: 80px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+  .brick-bar { height: 100%; border-radius: 2px; }
+  .bar-green { background: var(--green); }
+  .bar-amber { background: var(--amber); }
+  .bar-red { background: var(--red); }
+  .brick-val { font-size: 12px; color: rgba(255,255,255,0.4); width: 28px; text-align: right; }
+
+  .anomaly-item {
+    padding: 10px 14px; border-radius: 10px; margin-bottom: 8px;
+    border-left: 3px solid;
+    font-size: 13px; line-height: 1.4;
+  }
+  .anomaly-high { background: rgba(239,68,68,0.1); border-color: var(--red); }
+  .anomaly-med { background: rgba(245,158,11,0.1); border-color: var(--amber); }
+  .anomaly-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .tag-red { color: var(--red); }
+  .tag-amber { color: var(--amber); }
+
+  /* ── SLIDE 5: AI ── */
+  .s5 { background: linear-gradient(135deg, #0f0920, #0f172a); }
+  .ai-card {
+    background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 20px; padding: 28px; width: 100%; max-width: 800px; margin-top: 32px;
+  }
+  .ai-header { display: flex; align-items: center; gap-10px; margin-bottom: 16px; }
+  .ai-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: #c4b5fd; background: rgba(124,58,237,0.2); border: 1px solid rgba(124,58,237,0.4);
+    padding: 4px 12px; border-radius: 999px; margin-bottom: 14px;
+  }
+  .ai-text {
+    font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.75);
+  }
+  .ai-text strong { color: #fff; }
+  .ai-text .highlight { color: #a5b4fc; }
+
+  .ai-features { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 24px; max-width: 800px; }
+  .ai-feat {
+    background: var(--gray-800); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 20px;
+  }
+  .ai-feat .icon { font-size: 24px; margin-bottom: 10px; }
+  .ai-feat h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .ai-feat p { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+  /* ── SLIDE 6: Compliance ── */
+  .s6 { background: #0f172a; }
+  .compliance-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; width: 100%; max-width: 820px; margin-top: 32px; }
+  .comp-card {
+    background: var(--gray-800); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 24px;
+  }
+  .comp-card .comp-icon { font-size: 28px; margin-bottom: 12px; }
+  .comp-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .comp-card p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; }
+  .comp-card ul { list-style: none; margin-top: 8px; }
+  .comp-card ul li { font-size: 13px; color: rgba(255,255,255,0.45); padding: 3px 0; }
+  .comp-card ul li::before { content: '✓  '; color: var(--green); }
+
+  /* ── SLIDE 7: CTA ── */
+  .s7 { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%); }
+  .s7 h2 { font-size: clamp(36px, 5vw, 64px); font-weight: 800; letter-spacing: -2px; text-align: center; line-height: 1.1; margin-bottom: 16px; }
+  .s7 .sub { font-size: 18px; color: rgba(255,255,255,0.45); text-align: center; max-width: 500px; margin-bottom: 40px; line-height: 1.6; }
+  .cta-row { display: flex; gap: 16px; }
+  .btn {
+    padding: 14px 32px; border-radius: 12px; font-size: 15px; font-weight: 700;
+    cursor: pointer; border: none; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--blue), var(--violet)); color: #fff; }
+  .btn-secondary { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15); }
+  .url-pill {
+    margin-top: 32px; padding: 12px 24px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; font-size: 14px; color: rgba(255,255,255,0.4);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .url-pill span { color: var(--blue); }
+
+  /* shared heading */
+  .slide-title {
+    font-size: clamp(28px, 3.5vw, 44px); font-weight: 800;
+    letter-spacing: -1px; margin-bottom: 8px; text-align: center;
+  }
+  .slide-sub {
+    font-size: 16px; color: rgba(255,255,255,0.4);
+    text-align: center; max-width: 600px;
+  }
+
+  /* typing cursor animation */
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .cursor { display: inline-block; width: 2px; height: 1em; background: #a5b4fc; margin-left: 2px; vertical-align: middle; animation: blink 1s step-end infinite; }
+
+  /* pulse */
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.7;transform:scale(0.97)} }
+  .pulse { animation: pulse 2.5s ease-in-out infinite; }
+
+  /* float */
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+</style>
+</head>
+<body>
+
+<div class="counter"><span id="cur">1</span> / 7</div>
+
+<div class="deck" id="deck">
+
+  <!-- ── SLIDE 1: HERO ── -->
+  <div class="slide s1 active" id="s0">
+    <div class="glow"></div>
+    <div class="logo-mark">🧱</div>
+    <h1>GuardianBrick</h1>
+    <p class="tagline">AI-powered elderly safety monitoring through tiny wireless accelerometer sensors — no cameras, no microphones, full privacy.</p>
+    <div class="badge-row">
+      <span class="badge badge-blue">Claude Opus AI</span>
+      <span class="badge badge-green">GDPR Compliant</span>
+      <span class="badge badge-amber">EU AI Act — Limited Risk</span>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 2: PROBLEM ── -->
+  <div class="slide s2" id="s1">
+    <h2 class="slide-title">The Problem</h2>
+    <p class="slide-sub">Millions of elderly people live alone. Families worry constantly — but can't watch 24/7.</p>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num stat-red">1 in 3</div>
+        <div class="stat-label">elderly people live alone in the EU</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num stat-amber">12h</div>
+        <div class="stat-label">average time before a fallen elder is found</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num stat-blue">50%</div>
+        <div class="stat-label">of seniors miss at least one medication per day</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 3: SOLUTION ── -->
+  <div class="slide s3" id="s2">
+    <h2 class="slide-title">The Solution</h2>
+    <p class="slide-sub">Small wireless bricks placed around the home. Passive, private, always-on.</p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="icon">🧱</div>
+        <h3>Place Bricks</h3>
+        <p>Stick accelerometer sensors in each room — bedroom, kitchen, bathroom</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">📡</div>
+        <h3>Capture Movement</h3>
+        <p>Bricks detect vibration magnitude (0–10) — no audio, no video, no biometrics</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">🤖</div>
+        <h3>AI Analyses</h3>
+        <p>Claude Opus detects anomalies in daily patterns and explains them in plain language</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">🔔</div>
+        <h3>Family Notified</h3>
+        <p>Caregiver dashboard shows alerts, activity history, and AI health summaries</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 4: HOW IT WORKS ── -->
+  <div class="slide s4" id="s3">
+    <h2 class="slide-title">Live Dashboard</h2>
+    <p class="slide-sub">Two views — one for the elder, one for the family.</p>
+    <div class="two-col">
+      <div class="panel">
+        <h3>🧱 Brick Status</h3>
+        <div class="brick-item">
+          <div class="brick-dot green"></div>
+          <span class="brick-name">Bedroom</span>
+          <div class="brick-bar-wrap"><div class="brick-bar bar-green" style="width:25%"></div></div>
+          <span class="brick-val">2.3</span>
+        </div>
+        <div class="brick-item">
+          <div class="brick-dot green"></div>
+          <span class="brick-name">Kitchen</span>
+          <div class="brick-bar-wrap"><div class="brick-bar bar-green" style="width:55%"></div></div>
+          <span class="brick-val">5.5</span>
+        </div>
+        <div class="brick-item">
+          <div class="brick-dot green"></div>
+          <span class="brick-name">Living Room</span>
+          <div class="brick-bar-wrap"><div class="brick-bar bar-green" style="width:18%"></div></div>
+          <span class="brick-val">1.8</span>
+        </div>
+        <div class="brick-item">
+          <div class="brick-dot amber"></div>
+          <span class="brick-name">Bathroom</span>
+          <div class="brick-bar-wrap"><div class="brick-bar bar-amber" style="width:8%"></div></div>
+          <span class="brick-val">0.7</span>
+        </div>
+        <div class="brick-item">
+          <div class="brick-dot red"></div>
+          <span class="brick-name">Hallway</span>
+          <div class="brick-bar-wrap"><div class="brick-bar bar-red" style="width:0%"></div></div>
+          <span class="brick-val">—</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>⚠️ Active Anomalies</h3>
+        <div class="anomaly-item anomaly-high">
+          <div class="anomaly-tag tag-red">High</div>
+          Medication "Blood Pressure (Lisinopril)" not confirmed within 2 hours of 08:00.
+        </div>
+        <div class="anomaly-item anomaly-med">
+          <div class="anomaly-tag tag-amber">Medium</div>
+          No kitchen activity detected during breakfast window (07:00–09:00).
+        </div>
+        <div class="anomaly-item anomaly-med">
+          <div class="anomaly-tag tag-amber">Medium</div>
+          High movement at 3:14am — 8 significant readings in 90 minutes. Possible restlessness or fall.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: AI ── -->
+  <div class="slide s5" id="s4">
+    <h2 class="slide-title">Powered by Claude AI</h2>
+    <p class="slide-sub">Not just alerts — real understanding of daily patterns.</p>
+    <div class="ai-card">
+      <div class="ai-badge">✦ Claude Opus — Live AI Summary</div>
+      <p class="ai-text">
+        <strong>Activity patterns today are concerning.</strong> The bedroom brick shows normal wake-up activity at 6:45am, but the <span class="highlight">kitchen was completely inactive during the breakfast window</span> — unusual given the consistent morning cooking routine over the past 5 days. A high-magnitude event was detected in the hallway at 3:14am (magnitude 7.8), which may indicate nighttime disorientation. <strong>Recommended action:</strong> Call to confirm breakfast was eaten, and ask about last night's sleep quality.<span class="cursor"></span>
+      </p>
+    </div>
+    <div class="ai-features">
+      <div class="ai-feat">
+        <div class="icon">📊</div>
+        <h4>Pattern Analysis</h4>
+        <p>Per-brick hourly activity compared against personal baselines</p>
+      </div>
+      <div class="ai-feat">
+        <div class="icon">🔍</div>
+        <h4>Anomaly Explanation</h4>
+        <p>Plain-language explanation of each alert with specific recommended actions</p>
+      </div>
+      <div class="ai-feat">
+        <div class="icon">📈</div>
+        <h4>Trend Detection</h4>
+        <p>Multi-day comparison to spot gradual behavioural changes over time</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6: COMPLIANCE ── -->
+  <div class="slide s6" id="s5">
+    <h2 class="slide-title">Privacy First</h2>
+    <p class="slide-sub">Built for regulated healthcare environments from day one.</p>
+    <div class="compliance-grid">
+      <div class="comp-card">
+        <div class="comp-icon">🇪🇺</div>
+        <h3>GDPR Compliant</h3>
+        <ul>
+          <li>Legal basis: vital interests (Art. 6(1)(d))</li>
+          <li>Special category health data (Art. 9)</li>
+          <li>30-day sensor retention, 12-month medication logs</li>
+          <li>Full erasure on request</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon">⚖️</div>
+        <h3>EU AI Act — Limited Risk</h3>
+        <ul>
+          <li>Art. 6 classification — not high-risk</li>
+          <li>AI outputs are advisory only</li>
+          <li>Human review required before any action</li>
+          <li>Full transparency & audit trail</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon">🔒</div>
+        <h3>Data Minimisation</h3>
+        <ul>
+          <li>Only vibration magnitude recorded</li>
+          <li>No audio, video, or biometrics</li>
+          <li>Anonymised before AI processing</li>
+          <li>Local SQLite — data stays on device</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon">❤️</div>
+        <h3>Resident Rights</h3>
+        <ul>
+          <li>Explicit consent banner on first use</li>
+          <li>Withdraw consent at any time</li>
+          <li>Access, portability, rectification</li>
+          <li>Elder-friendly "I'm OK" check-in button</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 7: CTA ── -->
+  <div class="slide s7" id="s6">
+    <div class="glow" style="background:radial-gradient(circle,rgba(59,130,246,0.12) 0%,transparent 70%)"></div>
+    <div class="logo-mark pulse">🧱</div>
+    <h2>Let's see it live.</h2>
+    <p class="sub">Everything demoed today is running locally — seed demo data in one click and watch Claude AI analyse it in real time.</p>
+    <div class="cta-row">
+      <span class="btn btn-primary">🚀 See Demo</span>
+      <span class="btn btn-secondary">📊 Family Dashboard</span>
+    </div>
+    <div class="url-pill">localhost:3000<span>/family</span> &nbsp;·&nbsp; localhost:3000<span>/elderly</span></div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <button onclick="prev()">←</button>
+  <div class="dots" id="dots"></div>
+  <button onclick="next()">→</button>
+</div>
+
+<script>
+  const total = 7;
+  let cur = 0;
+
+  // build dots
+  const dotsEl = document.getElementById('dots');
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => go(i);
+    dotsEl.appendChild(d);
+  }
+
+  function go(n) {
+    document.getElementById('s' + cur).classList.remove('active');
+    dotsEl.children[cur].classList.remove('active');
+    cur = (n + total) % total;
+    document.getElementById('s' + cur).classList.add('active');
+    dotsEl.children[cur].classList.add('active');
+    document.getElementById('cur').textContent = cur + 1;
+  }
+
+  function next() { go(cur + 1); }
+  function prev() { go(cur - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prev(); }
+  });
+
+  // swipe support
+  let tx = 0;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) dx < 0 ? next() : prev();
+  });
+</script>
+</body>
+</html>
